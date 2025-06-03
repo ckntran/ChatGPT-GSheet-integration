@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      /* System font, light background, and spaced layout */
+      body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        margin: 0;
+        padding: 10px;
+        background-color: #ffffff;
+        color: #333333;
+      }
+      h1 {
+        font-size: 15px;
+        margin-bottom: 12px;
+      }
+      .field {
+        margin-bottom: 12px;
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        resize: vertical;
+      }
+      input[type=range] {
+        width: 100%;
+        margin-top: 4px;
+      }
+      #activeRange {
+        background-color: #f0f0f0;
+        padding: 6px;
+        border: 1px solid #ccc;
+        font-weight: bold;
+      }
+      #model {
+        padding: 6px;
+        border: 1px solid #ccc;
+        font-weight: bold;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #60a5fa;
+      }
+      .response {
+        margin-top: 12px;
+        padding: 8px;
+        border: 1px solid #eeeeee;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Use ChatGPT via =GPT(prompt, range, model, temperature), or use below UI:</h1>
+    
+    <div class="field">
+      <label for="prompt">Prompt</label>
+      <textarea id="prompt" placeholder="Enter your prompt..."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="prompt">Range</label>
+      <div id="activeRange">""</div>
+    </div>
+
+    <div class="field">
+      <label>Model</label>
+      <select id="model">
+        <option value="gpt-4o-mini" selected>gpt-4o-mini</option>
+        <option value="gpt-4">gpt-4</option>
+      </select>
+    </div>
+    
+    <div class="field">
+      <label for="temperature">Temperature (0 - deterministic, 1 - creative): <span id="tempValue">0.70</span></label>
+      <input type="range" id="temperature" min="0" max="1" step="0.01" value="0.70">
+    </div>
+    
+    <div class="field">
+      <button onclick="generateFormula()">Generate Formula</button>
+    </div>
+
+    <div class="field">
+      <label>Formula</label>
+      <textarea id="formula" rows="3" readonly></textarea>
+    </div>
+
+    <script>
+
+      // Update displayed cell reference
+      function updateSelectedRange() {
+        google.script.run.withSuccessHandler(function(rangeRef) {
+          const refDiv = document.getElementById('activeRange');
+          if (refDiv.textContent !== rangeRef) {
+            refDiv.textContent = rangeRef;
+          }
+        }).getActiveRangeReference();
+      }
+
+      // Poll for selected cell every second
+      setInterval(updateSelectedRange, 1000);
+
+      // Update displayed temperature when slider is moved
+      document.getElementById('temperature').addEventListener('input', function() {
+        document.getElementById('tempValue').textContent = this.value;
+      });
+
+      // Generate the formula for copy paste
+      function generateFormula() {
+        const prompt = document.getElementById('prompt').value.replace(/"/g, '""');
+        const model = document.getElementById('model').value;
+        const temperature = parseFloat(document.getElementById('temperature').value);
+        const range = document.getElementById('range').textContent;
+
+        const formula = `=GPT("${prompt}", "${range}", "${model}", ${temperature})`;
+        document.getElementById('formula').value = formula;
+      }
+
+    </script>
+  </body>
+</html>
